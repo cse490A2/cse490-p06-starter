@@ -1,0 +1,150 @@
+# CSE 490 Project 6 checks. They run on every pull request against main.
+#
+#   existing suite at head      the whole test suite passes with your change
+#   added test at head          the test file your pull request adds passes
+#   added test fails at base    that same test file fails without your change
+#   course files on the branch  reports the course files and the changed
+#                               source files; it never fails the pull request,
+#                               because the review trace lands after the pull
+#                               request opens
+#
+# Staff run the same logic without GitHub with run_checks_locally.sh.
+
+name: checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  suite-at-head:
+    name: existing suite at head
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install gifsicle, jpegtran, ffmpeg and redis
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gifsicle libjpeg-turbo-progs ffmpeg redis-server
+      - name: Start redis in the background
+        run: redis-server redis.conf
+      - name: Install thumbor
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e ".[tests,opencv,extra-libs]"
+          python setup.py build_ext -i
+      - name: Run the suite
+        run: python -m pytest tests -q -p no:cacheprovider -p no:tldr --ignore=tests/detectors --ignore=tests/integration_tests
+
+  added-test-at-head:
+    name: added test at head
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Find the test files this pull request adds
+        run: |
+          files=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/test_*.py')
+          if [ -z "$files" ]; then
+            echo "No new test file found under tests/. Add one file named tests/test_<something>.py that fails without your change."
+            exit 1
+          fi
+          echo "Added test files:"
+          echo "$files"
+          echo "$files" > "$RUNNER_TEMP/added-tests.txt"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install gifsicle, jpegtran, ffmpeg and redis
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gifsicle libjpeg-turbo-progs ffmpeg redis-server
+      - name: Start redis in the background
+        run: redis-server redis.conf
+      - name: Install thumbor
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e ".[tests,opencv,extra-libs]"
+          python setup.py build_ext -i
+      - name: Run the added tests at head
+        run: python -m pytest $(cat "$RUNNER_TEMP/added-tests.txt") -q -p no:cacheprovider -p no:tldr
+
+  added-test-fails-at-base:
+    name: added test fails at base
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Find the test files this pull request adds
+        run: |
+          files=$(git diff --name-only --diff-filter=A origin/main...HEAD -- 'tests/test_*.py')
+          if [ -z "$files" ]; then
+            echo "No new test file found under tests/. Add one file named tests/test_<something>.py that fails without your change."
+            exit 1
+          fi
+          echo "Added test files:"
+          echo "$files"
+          echo "$files" > "$RUNNER_TEMP/added-tests.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/head-sha.txt"
+          git merge-base origin/main HEAD > "$RUNNER_TEMP/base-sha.txt"
+      - name: Check out the base and apply only the added test files
+        run: |
+          base=$(cat "$RUNNER_TEMP/base-sha.txt")
+          head=$(cat "$RUNNER_TEMP/head-sha.txt")
+          echo "base: $base"
+          echo "head: $head"
+          git checkout --quiet "$base"
+          git checkout "$head" -- $(cat "$RUNNER_TEMP/added-tests.txt")
+          git status --short
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install gifsicle, jpegtran, ffmpeg and redis
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gifsicle libjpeg-turbo-progs ffmpeg redis-server
+      - name: Start redis in the background
+        run: redis-server redis.conf
+      - name: Install thumbor
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e ".[tests,opencv,extra-libs]"
+          python setup.py build_ext -i
+      - name: Run the added tests at base; this step passes only when they fail
+        run: |
+          if python -m pytest $(cat "$RUNNER_TEMP/added-tests.txt") -q -p no:cacheprovider -p no:tldr; then
+            echo "The new test passes without your change. It does not show the issue. Make it fail on the base commit before it passes with your fix."
+            exit 1
+          fi
+          echo "The new test fails without your change: good."
+
+  course-files:
+    name: course files on the branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Report the course files and the changed source files
+        run: |
+          for f in course/trace-build.jsonl course/trace-review.jsonl course/pile.md; do
+            if [ -f "$f" ]; then echo "PASS $f present"; else echo "FAIL $f missing"; fi
+          done
+          changed=$(git diff --name-only origin/main...HEAD -- 'thumbor/' | grep -v '/tests/' || true)
+          count=$(printf '%s\n' "$changed" | sed '/^$/d' | wc -l | tr -d ' ')
+          echo "Changed source files under thumbor/:"
+          printf '%s\n' "$changed" | sed '/^$/d' | sed 's/^/  /'
+          if [ "$count" -ge 2 ]; then
+            echo "PASS $count source files under thumbor/ changed (at least two expected)"
+          else
+            echo "FAIL $count source files under thumbor/ changed (at least two expected)"
+          fi
