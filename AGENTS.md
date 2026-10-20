@@ -18,7 +18,7 @@ Run the test suite with:
 
     python -m pytest tests -q -p no:cacheprovider -p no:tldr --ignore=tests/detectors --ignore=tests/integration_tests
 
-The gifsicle binary is optional on a laptop. Without it, the tests in tests/engines/test_gif.py fail, and so do tests/handlers/test_base_handler_with_cover.py::test_can_get_image_cover and tests/handlers/test_base_handler_with_different_storage_config.py::test_meta_frame_count_with_gif. Three tests in tests/handlers/test_base_handler_with_result_storage.py need a redis server. tests/test_doctor.py::test_get_doctor_output_no_config needs gifsicle, jpegtran and ffmpeg. Those failures are not defects. The checks on GitHub install those programs, so there every test is expected to pass.
+The gifsicle binary is optional on a laptop. Without it, the tests in tests/engines/test_gif.py fail, and so do tests/handlers/test_base_handler_with_cover.py::test_can_get_image_cover and tests/handlers/test_base_handler_with_different_storage_config.py::test_meta_frame_count_with_gif. Three tests in tests/handlers/test_base_handler_with_result_storage.py load an animated GIF through gifsicle and fail without it too. tests/test_doctor.py::test_get_doctor_output_no_config needs gifsicle, jpegtran and ffmpeg. tests/loaders/test_http_loader.py::HttpCurlTimeoutLoaderTestCase::test_load_with_speed_timeout depends on local timing and can fail on a laptop. Those failures are not defects. The checks on GitHub install those programs, so there every test is expected to pass.
 
 ## Course server
 
