@@ -1,3 +1,21 @@
+## CSE 490 Project 6
+
+This repository is the course copy of [thumbor](https://github.com/thumbor/thumbor) for CSE 490 Project 6.
+
+It is pinned at upstream commit `b31cf5142491e4533602038a24a833d796eb4328` (2026-09-20). The tag `p06-pin` marks that commit.
+
+thumbor is published under the MIT License. The license text is in [LICENSE](./LICENSE).
+
+Upstream takes pull requests from forks. Upstream has no written policy on AI-assisted contributions. Its contribution guide is [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+The course copy sits before four upstream fixes on purpose. The issues you work on in this project are real. Each one was reported upstream and fixed upstream after this pin.
+
+You work only in your own course repository. Do not open issues, pull requests, or comments on the upstream project as part of this course.
+
+The rest of this file is the upstream README as it was at the pin.
+
+---
+
 <h4 align="center">Join <a href="https://github.com/thumbor/thumbor-bootcamp">thumbor-bootcamp</a> for a learning and contribution experience with ❤️ and 🤗 from the thumbor team</h4>
 
 <p align="center">
