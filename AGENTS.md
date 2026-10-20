@@ -7,7 +7,7 @@ This repository is the course copy of thumbor for CSE 490 Project 6. This sectio
 Use Python 3.12 or newer. Run these commands at the repository root:
 
     python3 -m venv venv
-    source venv/bin/activate
+    source venv/bin/activate (on Windows: venv\Scripts\activate)
     pip install -U pip setuptools wheel
     pip install -e ".[tests,opencv,extra-libs]"
     python setup.py build_ext -i
@@ -34,7 +34,7 @@ The build run writes its trace to course/trace-build.jsonl. The review run write
 
 ## Conventions
 
-Work on a branch named issue-N, where N is the number of the issue you fix. Never push to main. Never force-push. Every fix adds one new test file under tests/ named tests/test_<something>.py. The new test fails without the fix and passes with it. A fix changes at least two source files under thumbor/. Do not weaken, skip or delete existing tests. Do not open issues, pull requests or comments on the upstream thumbor project.
+Work on a branch named issue-N, where N is the number of the issue you fix. Never push to main. Never force-push. Every fix adds one new test file under tests/ named tests/test_<something>.py. The new test fails without the fix and passes with it. A fix changes every file in the issue's declared surface under thumbor/; two issues live in one file, in two places. Do not weaken, skip or delete existing tests. Do not open issues, pull requests or comments on the upstream thumbor project.
 
 ## Pull request description
 
