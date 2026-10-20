@@ -1,3 +1,47 @@
+# CSE 490 Project 6
+
+This repository is the course copy of thumbor for CSE 490 Project 6. This section is the course's. The rest of this file is upstream's own AGENTS.md and still applies where it does not conflict with this section.
+
+## Dev install in this course
+
+Use Python 3.12 or newer. Run these commands at the repository root:
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -U pip setuptools wheel
+    pip install -e ".[tests,opencv,extra-libs]"
+    python setup.py build_ext -i
+
+The last command builds the C extensions. The server and the tests need them.
+
+Run the test suite with:
+
+    python -m pytest tests -q -p no:cacheprovider -p no:tldr --ignore=tests/detectors --ignore=tests/integration_tests
+
+The gifsicle binary is optional on a laptop. Without it, the tests in tests/engines/test_gif.py fail, and so do tests/handlers/test_base_handler_with_cover.py::test_can_get_image_cover and tests/handlers/test_base_handler_with_different_storage_config.py::test_meta_frame_count_with_gif. Three tests in tests/handlers/test_base_handler_with_result_storage.py need a redis server. tests/test_doctor.py::test_get_doctor_output_no_config needs gifsicle, jpegtran and ffmpeg. Those failures are not defects. The checks on GitHub install those programs, so there every test is expected to pass.
+
+## Course server
+
+Start the server with:
+
+    python -m thumbor.server -p 8888 -c course/thumbor.conf -l error
+
+course/thumbor.conf uses the file loader with course/images as its root. course/images holds the pictures the issues refer to: small.png, example.jpg, sticker.gif, rainbow.png, 940x2.png and hills.png. A URL such as http://127.0.0.1:8888/unsafe/fit-in/300x300/filters:fill(red):no_upscale():format(png)/small.png shows the transform in the browser. course/issues.json lists the issues with the URL each one is seen at.
+
+## Trace and note paths
+
+The build run writes its trace to course/trace-build.jsonl. The review run writes its trace to course/trace-review.jsonl. Your notes on where the issue lives go in course/pile.md. This file is the one owner of those three paths. No other file defines them.
+
+## Conventions
+
+Work on a branch named issue-N, where N is the number of the issue you fix. Never push to main. Never force-push. Every fix adds one new test file under tests/ named tests/test_<something>.py. The new test fails without the fix and passes with it. A fix changes at least two source files under thumbor/. Do not weaken, skip or delete existing tests. Do not open issues, pull requests or comments on the upstream thumbor project.
+
+## Pull request description
+
+The human writes the pull request description by hand. It names the issue. It names every changed source file. It names the AI tools used.
+
+---
+
 # AGENTS.md
 
 thumbor is a smart imaging HTTP service built with Python/Tornado. It resizes,
