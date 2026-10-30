@@ -28,13 +28,13 @@ Start the server with:
 
 course/thumbor.conf uses the file loader with course/images as its root. course/images holds the pictures the issues refer to: small.png, example.jpg, sticker.gif, rainbow.png, 940x2.png and hills.png. A URL such as http://127.0.0.1:8888/unsafe/fit-in/300x300/filters:fill(red):no_upscale():format(png)/small.png shows the transform in the browser. course/issues.json lists the issues with the URL each one is seen at.
 
-## Trace and note paths
+## Trace paths
 
-The build run writes its trace to course/trace-build.jsonl. The review run writes its trace to course/trace-review.jsonl. Your notes on where the issue lives go in course/pile.md. This file is the one owner of those three paths. No other file defines them.
+The build run writes its trace to course/trace-build.jsonl. The review run writes its trace to course/trace-review.jsonl. This file is the one owner of those two paths. No other file defines them. Each issue's branch carries its own pair.
 
 ## Conventions
 
-Work on a branch named issue-N, where N is the number of the issue you fix. Never push to main. Never force-push. Every fix adds one new test file under tests/ named tests/test_<something>.py. The new test fails without the fix and passes with it. A fix changes every file in the issue's declared surface under thumbor/; two issues live in one file, in two places. Do not weaken, skip or delete existing tests. Do not open issues, pull requests or comments on the upstream thumbor project.
+Work on a branch named issue-N, where N is the number of the issue you fix, one branch per issue. Open the pull request against main in your own repository, never against the course starter or the upstream project. Never push to main. Never force-push. Every fix adds one new test file under tests/ named tests/test_<something>.py. The new test fails without the fix and passes with it. A fix changes every file in the issue's declared surface under thumbor/; two issues live in one file, in two places. Do not weaken, skip or delete existing tests. Do not open issues, pull requests or comments on the upstream thumbor project.
 
 ## Pull request description
 
